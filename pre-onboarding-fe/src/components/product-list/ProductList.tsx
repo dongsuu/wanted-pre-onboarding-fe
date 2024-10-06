@@ -1,9 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Product } from "../product/Product";
 import { useInfinitefetch } from "../../hooks/useInfiniteFetch";
 import { ProductType } from "../product/types";
+import { PriceSum } from "./PriceSum";
 
 export function ProductList() {
+  const [sum, setSum] = useState<number>(0);
   const moreRef = useRef<HTMLDivElement>(null);
   const {
     state,
@@ -33,21 +35,32 @@ export function ProductList() {
     };
   }, [isEnd]);
 
+  useEffect(() => {
+    const sum = productList.reduce(
+      (price, product) => price + product.price,
+      0
+    );
+    setSum(sum);
+  }, [productList]);
+
   return (
-    <div className="flex flex-col gap-6 justify-center items-center overflow-scroll">
-      {productList.map((product) => (
-        <Product
-          key={`${product.productId}-${product.productName}-${
-            product.boughtDate
-          }-${Math.random()}`}
-          productName={product.productName}
-          price={product.price}
-          boughtDate={product.boughtDate}
-        />
-      ))}
-      {state === "loading" && <div>Loading...</div>}
-      {isEnd && <div>All data Loaded.</div>}
-      <div ref={moreRef} />
+    <div className="flex flex-row gap-6">
+      <div className="flex flex-col gap-6 justify-center items-center overflow-scroll">
+        {productList.map((product) => (
+          <Product
+            key={`${product.productId}-${product.productName}-${
+              product.boughtDate
+            }-${Math.random()}`}
+            productName={product.productName}
+            price={product.price}
+            boughtDate={product.boughtDate}
+          />
+        ))}
+        {state === "loading" && <div>Loading...</div>}
+        {isEnd && <div>All data Loaded.</div>}
+        <div ref={moreRef} />
+      </div>
+      <PriceSum sum={sum} />
     </div>
   );
 }
